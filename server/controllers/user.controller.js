@@ -88,6 +88,7 @@
 import { User } from "../models/user.model.js";
 import bcrypt from "bcryptjs";
 import { generateToken } from "../utils/generateToken.js";
+import { deleteMediaFromCloudinary, uploadMedia } from "../utils/cloudinary.js";
 
 // Register Controller
 export const register = async (req, res) => {
@@ -191,8 +192,20 @@ export const logout =  async (req, res) => {
 
 // Get User Profile Controller
 
-export const getUserProfileller = async (req, res) => { 
+export const getUserProfile = async (req, res) => { 
     try {
+      const userId = req.id;
+        const user = await User.findById(userId).select("-password").populate("enrolledCourses");
+        if(!user){
+            return res.status(404).json({
+                message:"Profile not found",
+                success:false
+            })
+        }
+        return res.status(200).json({
+            success:true,
+            user
+        })
       
     } catch (error) {
       console.error( error);
@@ -202,3 +215,56 @@ export const getUserProfileller = async (req, res) => {
     });
     }
  }
+
+
+ export const updateProfile = async (req,res) => {
+  try {
+      const userId = req.id;
+      const {name} = req.body;
+      const profilePhoto = req.file;
+
+      const user = await User.findById(userId);
+      if(!user){
+          return res.status(404).json({
+              message:"User not found",
+              success:false
+          }) 
+      }
+      // extract public id of the old image from the url is it exists;
+      if(user.photoUrl){
+          const publicId = user.photoUrl.split("/").pop().split(".")[0]; // extract public id
+          deleteMediaFromCloudinary(publicId);
+      }
+
+      // upload new photo
+      const cloudResponse = await uploadMedia(profilePhoto.path);
+      const photoUrl = cloudResponse.secure_url;
+
+      const updatedData = {name, photoUrl};
+      const updatedUser = await User.findByIdAndUpdate(userId, updatedData, {new:true}).select("-password");
+
+      return res.status(200).json({
+          success:true,
+          user:updatedUser,
+          message:"Profile updated successfully."
+      })
+
+  } catch (error) {
+      console.log(error);
+      return res.status(500).json({
+          success:false,
+          message:"Failed to update profile"
+      })
+  }
+}
+
+
+// logout controller
+export const logoutProfile = (req, res) => {
+  res.clearCookie("token", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "strict",
+  });
+  res.status(200).json({ success: true, message: "Logged out successfully" });
+};

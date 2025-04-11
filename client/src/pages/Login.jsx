@@ -114,43 +114,64 @@ export function Login() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-2">
-              <div className="space-y-1">
-                <Label htmlFor="name">Name</Label>
-                <Input
-                  type="text"
-                  name="name"
-                  value={signupInput.name}
-                  id="name"
-                  onChange={(e) => changeInputHandler(e, "signup")}
-                  placeholder="Eg. jay"
-                  required
-                />
-              </div>
-              <div className="space-y-1">
-                <Label htmlFor="username">Email</Label>
-                <Input
-                  type="email"
-                  name="email"
-                  value={signupInput.email}
-                  id="email"
-                  onChange={(e) => changeInputHandler(e, "signup")}
-                  placeholder="Eg. jay@gmail.com"
-                  required
-                />
-              </div>
-              <div className="space-y-1">
-                <Label htmlFor="password">Password</Label>
-                <Input
-                  type="password"
-                  name="password"
-                  value={signupInput.password}
-                  id="password"
-                  onChange={(e) => changeInputHandler(e, "signup")}
-                  placeholder="Eg. jay@124"
-                  required
-                />
-              </div>
-            </CardContent>
+  <div className="space-y-1">
+    <Label htmlFor="name">Name</Label>
+    <Input
+      type="text"
+      name="name"
+      value={signupInput.name}
+      id="name"
+      onChange={(e) => changeInputHandler(e, "signup")}
+      placeholder="Eg. jay"
+      required
+    />
+  </div>
+  <div className="space-y-1">
+    <Label htmlFor="username">Email</Label>
+    <Input
+      type="email"
+      name="email"
+      value={signupInput.email}
+      id="email"
+      onChange={(e) => changeInputHandler(e, "signup")}
+      placeholder="Eg. jay@gmail.com"
+      required
+    />
+  </div>
+  <div className="space-y-1">
+    <Label htmlFor="password">Password</Label>
+    <Input
+      type="password"
+      name="password"
+      value={signupInput.password}
+      id="password"
+      onChange={(e) => changeInputHandler(e, "signup")}
+      placeholder="Eg. jay@124"
+      required
+    />
+  </div>
+  <div className="space-y-1">
+    <Label>Role</Label>
+    <div className="flex items-center gap-4">
+      <Button
+        variant={signupInput.role === "student" ? "default" : "outline"}
+        onClick={() =>
+          setSignupInput((prev) => ({ ...prev, role: "student" }))
+        }
+      >
+        Student
+      </Button>
+      <Button
+        variant={signupInput.role === "instructor" ? "default" : "outline"}
+        onClick={() =>
+          setSignupInput((prev) => ({ ...prev, role: "instructor" }))
+        }
+      >
+        Instructor
+      </Button>
+    </div>
+  </div>
+</CardContent>
             <CardFooter>
               <Button
                 disabled={registerIsLoading}

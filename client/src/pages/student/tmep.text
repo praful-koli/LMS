@@ -1,0 +1,14 @@
+  <form action="" className="flex max-w-xl mx-auto mb-6   dark:bg-gray-800 rounded-full overflow-hidden shadow-lg">
+          <input
+            placeholder="Search for courses, instructors, or topics..."
+            className="flex-grow bg-white border-none focus-visible:ring-0 px-6 py-3 text-gray-900  dark:text-gray-100 placeholder-gray-400  dark:placeholder-gray-500 rounded-l-full shadow-lg overflow-hidden max-w-xl "
+            type="text"
+          />
+          <button type="submit"  className="bg-blue-600 dark:bg-blue-700 text-white px-6 py-3 rounded-r-full shadow-lg hover:bg-blue-700 dark:hover:bg-blue-800 transition duration-300">
+            search
+          </button>
+         
+        </form>
+        <button type="submit"  className="bg-white  dark:bg-gray-800 text-blue-600 dark:text-white px-6 py-3 rounded-full shadow-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition duration-300">
+            Explore Courses
+          </button>

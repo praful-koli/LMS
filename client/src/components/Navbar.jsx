@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { School, Menu } from "lucide-react";
 import { DropdownMenu, DropdownMenuItem } from "./ui/dropdown-menu";
 import { DropdownMenuTrigger } from "./ui/dropdown-menu";
@@ -20,25 +20,43 @@ import {
 } from "./ui/sheet";
 
 import { Separator } from "@radix-ui/react-dropdown-menu";
-import { Link } from "react-router-dom";
+import { Link, Navigate, useNavigate } from "react-router-dom";
+import { useLogoutUserMutation } from "@/features/api/authApi";
+import { toast } from "sonner";
+import { useSelector } from "react-redux";
 export default function Navbar() {
   // this should be replaced with the actual user role from your auth context or state management
-  const user = true;
+  const {user} = useSelector(store => store.auth);
+  const[logoutUser , {data,isSuccess}] = useLogoutUserMutation();
+  const navigate = useNavigate();
+  const logoutHandler = async () => {
+    await logoutUser();
+  };
+  
+  useEffect(() => {
+    if (isSuccess) {
+      toast.success(data?.message || "User log out.");
+      navigate("/login");
+    }
+  }, [isSuccess]);
   return (
-    <div className="h-16 dark:bg-[#0A0A0A] bg-white border-b dark:border-b-gray-800 border-b-gray-200 fixed top-0 left-0 right-0 duration-300 z-50 ">
+    <div className="h-16 dark:bg-[#050505] bg-white border-b dark:border-b-gray-800 border-b-gray-200 fixed top-0 left-0 right-0 duration-300 z-50 ">
       {/* Desktop */}
       <div className=" items-center justify-between h-full px-4 md:px-10 max-w-7xl mx-auto hidden md:flex gap-10">
         <div className="flex items-center gap-2">
           <School size={"30"} />
+         <Link to={"/"} className="text-2xl font-normal front-extra">
           <h1 className="hidden md:block front-extra text-2xl font-normal">
             E-Learning
           </h1>
+         </Link>
         </div>
         {/* user icons and dark mode icon */}
         <div className="flex items-center gap-5">
           {user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
+                <div className="flex items-center gap-2 cursor-pointer">
                 <Avatar>
                   <AvatarImage
                     src={user?.photoUrl || "https://github.com/shadcn.png"}
@@ -46,6 +64,7 @@ export default function Navbar() {
                   />
                   <AvatarFallback>CN</AvatarFallback>
                 </Avatar>
+                </div>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-56">
                 <DropdownMenuLabel>My Account</DropdownMenuLabel>
@@ -53,19 +72,24 @@ export default function Navbar() {
                 <DropdownMenuGroup>
                   <DropdownMenuItem> <Link to={"/my-learning"}>My Learning</Link> </DropdownMenuItem>
                   <DropdownMenuItem><Link to={"/Profile"}>Edit Profile</Link> </DropdownMenuItem>
-                  <DropdownMenuItem>Log out</DropdownMenuItem>
+                  <DropdownMenuItem onClick={logoutHandler}>Log out</DropdownMenuItem>
                 </DropdownMenuGroup>
-
+                {user?.role === "instructor" && (
+                  <>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem><Link to={"/admin/dashboard"}>Dashboard</Link></DropdownMenuItem>
+                  </>
+                )}
                 <DropdownMenuSeparator />
-                <DropdownMenuItem><Link to={"/"}>Dashboard</Link></DropdownMenuItem>
+                <DropdownMenuItem><Link to={"/"}>Home</Link></DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
             <div className="flex items-center gap-2">
-              <Button variant="outline" className="bg-white ">
+              <Button variant="outline" className="bg-white  " onClick={() => navigate("/login")}>
                 Login
               </Button>
-              <Button>Signup</Button>
+              <Button onClick={() => navigate("/login")}>Signup</Button>
             </div>
           )}
 
