@@ -1,6 +1,8 @@
+import React, { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+import { useGenerateCertificateMutation } from "@/features/api/certificateApi";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-// import { Button } from "./ui/button";
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import {
   useCompleteCourseMutation,
@@ -9,29 +11,23 @@ import {
   useUpdateLectureProgressMutation,
 } from "@/features/api/courseProgressApi";
 import { CheckCircle, CheckCircle2, CirclePlay } from "lucide-react";
-import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
 import { toast } from "sonner";
 
+import { useLoadUserQuery } from "@/features/api/authApi";
 const CourseProgress = () => {
   const params = useParams();
   const courseId = params.courseId;
-  const { data, isLoading, isError, refetch } =
-    useGetCourseProgressQuery(courseId);
+  const { data, isLoading, isError, refetch } = useGetCourseProgressQuery(courseId);
 
   const [updateLectureProgress] = useUpdateLectureProgressMutation();
-  const [
-    completeCourse,
-    { data: markCompleteData, isSuccess: completedSuccess },
-  ] = useCompleteCourseMutation();
-  const [
-    inCompleteCourse,
-    { data: markInCompleteData, isSuccess: inCompletedSuccess },
-  ] = useInCompleteCourseMutation();
+  const [completeCourse, { data: markCompleteData, isSuccess: completedSuccess }] = useCompleteCourseMutation();
+  const [inCompleteCourse, { data: markInCompleteData, isSuccess: inCompletedSuccess }] = useInCompleteCourseMutation();
+  
+  const [generateCertificate, { isLoading: isGenerating }] = useGenerateCertificateMutation();
+  
+  const [currentLecture, setCurrentLecture] = useState(null);
 
   useEffect(() => {
-    console.log(markCompleteData);
-
     if (completedSuccess) {
       refetch();
       toast.success(markCompleteData.message);
@@ -42,19 +38,15 @@ const CourseProgress = () => {
     }
   }, [completedSuccess, inCompletedSuccess]);
 
-  const [currentLecture, setCurrentLecture] = useState(null);
+  const { data: userData, isLoading: isUserLoading, refetch: refetchUser } = useLoadUserQuery();
 
   if (isLoading) return <p>Loading...</p>;
   if (isError) return <p>Failed to load course details</p>;
 
-  console.log(data);
-
   const { courseDetails, progress, completed } = data.data;
   const { courseTitle } = courseDetails;
 
-  // initialze the first lecture is not exist
-  const initialLecture =
-    currentLecture || (courseDetails.lectures && courseDetails.lectures[0]);
+  const initialLecture = currentLecture || (courseDetails.lectures && courseDetails.lectures[0]);
 
   const isLectureCompleted = (lectureId) => {
     return progress.some((prog) => prog.lectureId === lectureId && prog.viewed);
@@ -64,32 +56,51 @@ const CourseProgress = () => {
     await updateLectureProgress({ courseId, lectureId });
     refetch();
   };
-  // Handle select a specific lecture to watch
+
   const handleSelectLecture = (lecture) => {
     setCurrentLecture(lecture);
     handleLectureProgress(lecture._id);
   };
 
-
   const handleCompleteCourse = async () => {
     await completeCourse(courseId);
   };
+
   const handleInCompleteCourse = async () => {
     await inCompleteCourse(courseId);
   };
 
+  
+   const user = userData?.user; // This contains the user's data
+   console.log(user.name);
+
+  const handleGenerateCertificate = async () => {
+    console.log(user.name);
+    console.log(courseTitle);
+    try {
+      const response = await generateCertificate({
+        userName: user.name, // or pull from user state/context
+        courseName: courseTitle,
+        userId: user._id, // Extract userId from user object
+      }).unwrap();
+      window.open(response.certificateUrl, "_blank");
+      console.log("Certificate URL:", response.certificateUrl);
+      toast.success("Certificate generated successfully");
+    } catch (error) {
+      console.error("Error generating certificate:", error);
+      toast.error("Failed to generate certificates");
+    }
+  };
+
   return (
     <div className="max-w-7xl mx-auto p-4 mt-20">
-      {/* Display course name  */}
+      {/* Display course name */}
       <div className="flex justify-between mb-4">
         <h1 className="text-2xl font-bold">{courseTitle}</h1>
-        <Button
-          onClick={completed ? handleInCompleteCourse : handleCompleteCourse}
-          variant={completed ? "outline" : "default"}
-        >
+        <Button onClick={completed ? handleInCompleteCourse : handleCompleteCourse} variant={completed ? "outline" : "default"}>
           {completed ? (
             <div className="flex items-center">
-              <CheckCircle className="h-4 w-4 mr-2" /> <span>Completed</span>{" "}
+              <CheckCircle className="h-4 w-4 mr-2" /> <span>Completed</span>
             </div>
           ) : (
             "Mark as completed"
@@ -98,33 +109,29 @@ const CourseProgress = () => {
       </div>
 
       <div className="flex flex-col md:flex-row gap-6">
-        {/* Video section  */}
+        {/* Video section */}
         <div className="flex-1 md:w-3/5 h-fit rounded-lg shadow-lg p-4">
           <div>
             <video
               src={currentLecture?.videoUrl || initialLecture.videoUrl}
               controls
               className="w-full h-auto md:rounded-lg"
-              onPlay={() =>
-                handleLectureProgress(currentLecture?._id || initialLecture._id)
-              }
+              onPlay={() => handleLectureProgress(currentLecture?._id || initialLecture._id)}
             />
           </div>
           {/* Display current watching lecture title */}
-          <div className="mt-2 ">
+          <div className="mt-2">
             <h3 className="font-medium text-lg">
               {`Lecture ${
                 courseDetails.lectures.findIndex(
-                  (lec) =>
-                    lec._id === (currentLecture?._id || initialLecture._id)
+                  (lec) => lec._id === (currentLecture?._id || initialLecture._id)
                 ) + 1
-              } : ${
-                currentLecture?.lectureTitle || initialLecture.lectureTitle
-              }`}
+              } : ${currentLecture?.lectureTitle || initialLecture.lectureTitle}`}
             </h3>
           </div>
         </div>
-        {/* Lecture Sidebar  */}
+
+        {/* Lecture Sidebar */}
         <div className="flex flex-col w-full md:w-2/5 border-t md:border-t-0 md:border-l border-gray-200 md:pl-4 pt-4 md:pt-0">
           <h2 className="font-semibold text-xl mb-4">Course Lecture</h2>
           <div className="flex-1 overflow-y-auto">
@@ -146,16 +153,11 @@ const CourseProgress = () => {
                       <CirclePlay size={24} className="text-gray-500 mr-2" />
                     )}
                     <div>
-                      <CardTitle className="text-lg font-medium">
-                        {lecture.lectureTitle}
-                      </CardTitle>
+                      <CardTitle className="text-lg font-medium">{lecture.lectureTitle}</CardTitle>
                     </div>
                   </div>
                   {isLectureCompleted(lecture._id) && (
-                    <Badge
-                      variant={"outline"}
-                      className="bg-green-200 text-green-600"
-                    >
+                    <Badge variant={"outline"} className="bg-green-200 text-green-600">
                       Completed
                     </Badge>
                   )}
@@ -165,6 +167,17 @@ const CourseProgress = () => {
           </div>
         </div>
       </div>
+
+      {/* Certificate generation */}
+      {completed && (
+        <button
+          onClick={handleGenerateCertificate}
+          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 mt-4"
+          disabled={isGenerating}
+        >
+          {isGenerating ? "Generating..." : "Download Certificate"}
+        </button>
+      )}
     </div>
   );
 };

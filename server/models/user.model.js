@@ -29,6 +29,14 @@ const userSchema = new mongoose.Schema({
         type: String,
         default: "",
     },
+    certificates: [
+        {
+          courseName: String,
+          url: String,
+          uploadedAt: { type: Date, default: Date.now },
+        },
+      ],
+
 
 },{timestamps: true});
 

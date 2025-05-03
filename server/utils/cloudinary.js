@@ -35,3 +35,21 @@ export const deleteVideoFromCloudinary = async (publicId) => {
     }
 }
 
+export const uploadCertificate = async (filePath) => {
+  try {
+    const result = await cloudinary.uploader.upload(filePath, {
+      resource_type: "auto", // ← allow image, PDF, etc.
+      folder: "certificates",
+    });
+
+    // Manually override URL to use raw delivery (for proper PDF access)
+    const rawUrl = result.secure_url.replace("/image/", "/raw/");
+
+    return { ...result, secure_url: rawUrl };
+  } catch (err) {
+    console.error("Cloudinary upload error:", err);
+    throw err;
+  }
+};
+
+

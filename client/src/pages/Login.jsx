@@ -99,7 +99,7 @@ export function Login() {
   
 
   return (
-    <div className="flex h-screen w-full items-center justify-center bg-gray-100 shadow-md">
+    <div className="flex h-screen w-full items-center justify-center bg-gray-100 shadow-md ">
       <Tabs defaultValue="signup" className="w-[400px]">
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="signup">Sign up</TabsTrigger>

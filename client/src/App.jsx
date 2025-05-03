@@ -17,12 +17,14 @@ import CourseDetail from "./pages/student/CourseDetail";
 import CourseProgress from "./pages/student/CourseProgress";
 import SearchPage from "./pages/student/SearchPage";
 import {
+  // Rouste
   AdminRoute,
   AuthenticatedUser,
   ProtectedRoute,
 } from "./components/ProtectedRoutes";
 import PurchaseCourseProtectedRoute from "./components/PurchaseCourseProtectedRoute";
 import { ThemeProvider } from "./components/ThemeProvider";
+import Footer from "./components/footer";
 
 const appRouter = createBrowserRouter([
   {
@@ -35,6 +37,7 @@ const appRouter = createBrowserRouter([
           <>
             <HeroSection />
             <Courses />
+            <Footer />
           </>
         ),
       },
@@ -86,6 +89,7 @@ const appRouter = createBrowserRouter([
            
         ),
       },
+      
 
       // admin routes start from here
       {

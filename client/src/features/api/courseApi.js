@@ -130,6 +130,13 @@ export const courseApi = createApi({
         method: "PATCH",
       }),
     }),
+
+    generateCertificate: builder.mutation({
+      query: ({ courseId, userId }) => ({
+        url: `/certificate/${courseId}/${userId}`,
+        method: "POST",
+      }),
+    }),
   }),
 });
 export const {
@@ -146,4 +153,5 @@ export const {
   useRemoveLectureMutation,
   useGetLectureByIdQuery,
   usePublishCourseMutation,
+  useGenerateCertificateMutation,
 } = courseApi;

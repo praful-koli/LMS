@@ -72,6 +72,7 @@ export default function Navbar() {
                 <DropdownMenuGroup>
                   <DropdownMenuItem> <Link to={"/my-learning"}>My Learning</Link> </DropdownMenuItem>
                   <DropdownMenuItem><Link to={"/Profile"}>Edit Profile</Link> </DropdownMenuItem>
+                  <DropdownMenuItem><Link to={"/Profile"}>Certificate</Link> </DropdownMenuItem>
                   <DropdownMenuItem onClick={logoutHandler}>Log out</DropdownMenuItem>
                 </DropdownMenuGroup>
                 {user?.role === "instructor" && (
